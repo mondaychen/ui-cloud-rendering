@@ -1,0 +1,45 @@
+{
+  "name": "cloud-rendering-demo",
+  "version": "1.0.0",
+  "description": "Cloud Rendering React from Scratch!",
+  "main": "index.js",
+  "engines": {
+    "node": ">=8.10.0",
+    "npm": ">=5.7.1"
+  },
+  "scripts": {
+    "start": "npm-run-all --parallel server watch",
+    "server": "nodemon --exec babel-node index.js",
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --config webpack.config.dev.js"
+  },
+  "author": "Mengdi Chen <monday.chen@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "express": "^4.17.1",
+    "jsdom": "^15.1.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-redux": "^5.1.1",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.3.0",
+    "reselect": "^4.0.0",
+    "todomvc-app-css": "^2.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.0",
+    "@babel/node": "^7.5.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.0",
+    "@babel/preset-env": "^7.5.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.6",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "nodemon": "^1.19.1",
+    "npm-run-all": "^4.1.5",
+    "webpack": "^4.35.2",
+    "webpack-cli": "^3.3.5"
+  }
+}
