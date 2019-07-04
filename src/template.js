@@ -1,10 +1,10 @@
 // html skeleton provider
-function template(title, content = ""){
+function template(title, content = '') {
   let scripts = ''; // Dynamically ship scripts based on render type
-  if(content){
-    scripts = `<script src="assets/js/client.js"></script>`
+  if (content) {
+    scripts = `<script src="assets/js/client.js"></script>`;
   } else {
-    scripts = ` <script src="assets/js/bundle.js"> </script> `
+    scripts = ` <script src="assets/js/bundle.js"> </script> `;
   }
   let page = `<!DOCTYPE html>
               <html lang="en">
