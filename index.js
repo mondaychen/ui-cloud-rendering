@@ -5,7 +5,7 @@ import uuid from 'uuid';
 import session from 'express-session';
 import WebSocket from 'ws';
 import template from './src/template';
-import ssr from './src/server-render';
+import ssr, { getEmitter } from './src/server-render';
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +14,7 @@ const server = http.createServer(app);
 // WebSocket server.
 const sessionParser = session({
   name: 'cloud-render-id',
+  maxAge: 60000,
   saveUninitialized: false,
   secret: 'Mengd1$eCuRiTy',
   resave: false
@@ -32,8 +33,12 @@ app.get('/', (req, res) => {
     req.session.renderId = uuid();
     console.log('Setting new renderID: ' + req.session.renderId);
   }
-  const { content } = ssr();
-  const response = template('Server Rendered Page', content, req.session.renderId);
+  const content = ssr(req.session.renderId);
+  const response = template(
+    'Server Rendered Page',
+    content,
+    req.session.renderId
+  );
   res.setHeader('Cache-Control', 'assets, max-age=604800');
   res.send(response);
 });
@@ -51,14 +56,19 @@ const wss = new WebSocket.Server({
 });
 
 wss.on('connection', function(ws, request) {
-  // sessionParser(request, {}, () => {
-  // });
+  const id = request.session.renderId;
+  const emitter = getEmitter(id);
+  emitter.on('output', output => {
+    console.log(output);
+  });
   ws.on('message', function(message) {
-    // Here we can now use session parameters.
-    console.log(`WS message ${message} from user ${request.session.renderId}`);
+    console.log(`WS message ${message} from ${id}`);
+    emitter.emit('input');
+  });
+  ws.on('close', function() {
+    console.log(`WS connection ${id} close`);
   });
 });
-
 
 // start the server
 const port = process.env.PORT || 3090;

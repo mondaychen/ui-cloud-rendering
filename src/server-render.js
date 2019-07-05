@@ -1,5 +1,4 @@
 import React from 'react';
-// import { render } from 'react-dom';
 import { JSDOM } from 'jsdom';
 import { mount, configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
@@ -10,6 +9,17 @@ import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import reducer from './app/reducers';
 import App from './app/components/App';
+
+import EventEmitter from 'events';
+// TODO: memory leak! make it expire with session
+const Emitters = new Map();
+
+export function getEmitter(id) {
+  if (Emitters.has(id)) {
+    return Emitters.get(id);
+  }
+  return false;
+}
 
 function buildJSDOMWindow() {
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>');
@@ -37,7 +47,7 @@ function buildJSDOMWindow() {
   return window;
 }
 
-module.exports = function serverRender() {
+export default function serverRender(id) {
   // Configure the store with the initial state provided
   const store = createStore(reducer);
   const window = buildJSDOMWindow();
@@ -57,9 +67,18 @@ module.exports = function serverRender() {
       <App />
     </Provider>
   );
-  // wrapper.find('.delete-btn').first().simulate('click');
-  const content = wrapper.html();
-  console.log(window.document.activeElement.innerHTML);
 
-  return { content, store };
-};
+  const emitter = new EventEmitter();
+  Emitters.set(id, emitter);
+  emitter.on(`input`, function(type, path) {
+    wrapper
+      .find('.toggle')
+      .first()
+      .simulate('change', { target: { checked: true } });
+    emitter.emit(`output`, wrapper.html());
+  });
+
+  const content = wrapper.html();
+
+  return content;
+}
