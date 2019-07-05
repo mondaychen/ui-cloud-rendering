@@ -19,13 +19,16 @@
   "dependencies": {
     "classnames": "^2.2.6",
     "express": "^4.17.1",
+    "express-session": "^1.16.2",
     "jsdom": "^15.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-redux": "^5.1.1",
     "redux": "^3.7.2",
     "reselect": "^4.0.0",
-    "todomvc-app-css": "^2.2.0"
+    "todomvc-app-css": "^2.2.0",
+    "uuid": "^3.3.2",
+    "ws": "^7.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

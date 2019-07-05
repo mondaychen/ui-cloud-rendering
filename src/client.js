@@ -19,3 +19,18 @@ hydrate(
   </Provider>,
   document.querySelector('#app')
 );
+
+const ws = new WebSocket(`ws://${location.host}`);
+ws.onerror = function() {
+  console.log('WebSocket error');
+};
+ws.onopen = function() {
+  console.log('WebSocket connection established');
+};
+ws.onclose = function() {
+  console.log('WebSocket connection closed');
+};
+
+setTimeout(() => {
+  ws.send('Hello!');
+}, 1000);

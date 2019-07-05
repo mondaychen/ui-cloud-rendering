@@ -1,11 +1,6 @@
 // html skeleton provider
-function template(title, content = '') {
-  let scripts = ''; // Dynamically ship scripts based on render type
-  if (content) {
-    scripts = `<script src="assets/js/client.js"></script>`;
-  } else {
-    scripts = ` <script src="assets/js/bundle.js"> </script> `;
-  }
+function template(title, content, renderId) {
+  const scripts = `<script src="assets/js/client.js"></script>`;
   let page = `<!DOCTYPE html>
               <html lang="en">
               <head>
@@ -13,7 +8,7 @@ function template(title, content = '') {
                 <title> ${title} </title>
                 <link href="assets/css/index.css" rel="stylesheet">
               </head>
-              <body>
+              <body data-render-id="${renderId}">
                   <div id="app" class="todoapp">${content}</div>
                   ${scripts}
               </body>
