@@ -2,63 +2,74 @@
 import Browser from './browser';
 import {
   FOCUSABLE_INPUTS,
-  PHX_LOADING_CLASS, PHX_DISABLE_WITH, PHX_DISABLED, PHX_READONLY,
-  PHX_HAS_FOCUSED, PHX_HAS_SUBMITTED
-} from './constants'
+  PHX_LOADING_CLASS,
+  PHX_DISABLE_WITH,
+  PHX_DISABLED,
+  PHX_READONLY,
+  PHX_HAS_FOCUSED,
+  PHX_HAS_SUBMITTED
+} from './constants';
 
 const DOM = {
-
-  disableForm(form, prefix){
-    let disableWith = `${prefix}${PHX_DISABLE_WITH}`
-    form.classList.add(PHX_LOADING_CLASS)
+  disableForm(form, prefix) {
+    let disableWith = `${prefix}${PHX_DISABLE_WITH}`;
+    form.classList.add(PHX_LOADING_CLASS);
     Browser.all(form, `[${disableWith}]`, el => {
-      let value = el.getAttribute(disableWith)
-      el.setAttribute(`${disableWith}-restore`, el.innerText)
-      el.innerText = value
-    })
-    Browser.all(form, "button", button => {
-      button.setAttribute(PHX_DISABLED, button.disabled)
-      button.disabled = true
-    })
-    Browser.all(form, "input", input => {
-      input.setAttribute(PHX_READONLY, input.readOnly)
-      input.readOnly = true
-    })
+      let value = el.getAttribute(disableWith);
+      el.setAttribute(`${disableWith}-restore`, el.innerText);
+      el.innerText = value;
+    });
+    Browser.all(form, 'button', button => {
+      button.setAttribute(PHX_DISABLED, button.disabled);
+      button.disabled = true;
+    });
+    Browser.all(form, 'input', input => {
+      input.setAttribute(PHX_READONLY, input.readOnly);
+      input.readOnly = true;
+    });
   },
 
-  restoreDisabledForm(form, prefix){
-    let disableWith = `${prefix}${PHX_DISABLE_WITH}`
-    form.classList.remove(PHX_LOADING_CLASS)
+  restoreDisabledForm(form, prefix) {
+    let disableWith = `${prefix}${PHX_DISABLE_WITH}`;
+    form.classList.remove(PHX_LOADING_CLASS);
     Browser.all(form, `[${disableWith}]`, el => {
-      let value = el.getAttribute(`${disableWith}-restore`)
-      if(value){
-        el.innerText = value
-        el.removeAttribute(`${disableWith}-restore`)
+      let value = el.getAttribute(`${disableWith}-restore`);
+      if (value) {
+        el.innerText = value;
+        el.removeAttribute(`${disableWith}-restore`);
       }
-    })
-    Browser.all(form, "button", button => {
-      let prev = button.getAttribute(PHX_DISABLED)
-      if(prev){
-        button.disabled = prev === "true"
-        button.removeAttribute(PHX_DISABLED)
+    });
+    Browser.all(form, 'button', button => {
+      let prev = button.getAttribute(PHX_DISABLED);
+      if (prev) {
+        button.disabled = prev === 'true';
+        button.removeAttribute(PHX_DISABLED);
       }
-    })
-    Browser.all(form, "input", input => {
-      let prev = input.getAttribute(PHX_READONLY)
-      if(prev){
-        input.readOnly = prev === "true"
-        input.removeAttribute(PHX_READONLY)
+    });
+    Browser.all(form, 'input', input => {
+      let prev = input.getAttribute(PHX_READONLY);
+      if (prev) {
+        input.readOnly = prev === 'true';
+        input.removeAttribute(PHX_READONLY);
       }
-    })
+    });
   },
 
-  discardError(el){
-    let field = el.getAttribute && el.getAttribute(PHX_ERROR_FOR)
-    if(!field) { return }
-    let input = document.getElementById(field)
+  discardError(el) {
+    let field = el.getAttribute && el.getAttribute(PHX_ERROR_FOR);
+    if (!field) {
+      return;
+    }
+    let input = document.getElementById(field);
 
-    if(field && !(input.getAttribute(PHX_HAS_FOCUSED) || input.form.getAttribute(PHX_HAS_SUBMITTED))){
-      el.style.display = "none"
+    if (
+      field &&
+      !(
+        input.getAttribute(PHX_HAS_FOCUSED) ||
+        input.form.getAttribute(PHX_HAS_SUBMITTED)
+      )
+    ) {
+      el.style.display = 'none';
     }
   },
 
@@ -66,9 +77,11 @@ const DOM = {
   //   return node.getAttribute && node.getAttribute(PHX_PARENT_ID)
   // },
 
-  isIgnored(el, phxIgnore){
-    return (el.getAttribute && el.getAttribute(phxIgnore) != null) ||
-           (el.parentNode && el.parentNode.getAttribute(phxIgnore) != null)
+  isIgnored(el, phxIgnore) {
+    return (
+      (el.getAttribute && el.getAttribute(phxIgnore) != null) ||
+      (el.parentNode && el.parentNode.getAttribute(phxIgnore) != null)
+    );
   },
 
   // patch(view, container, id, html){
@@ -143,32 +156,39 @@ const DOM = {
   //   Browser.dispatchEvent(document, "phx:update")
   // },
 
-  mergeAttrs(target, source){
-    var attrs = source.attributes
-    for (let i = 0, length = attrs.length; i < length; i++){
-      let name = attrs[i].name
-      let value = source.getAttribute(name)
-      target.setAttribute(name, value)
+  mergeAttrs(target, source) {
+    var attrs = source.attributes;
+    for (let i = 0, length = attrs.length; i < length; i++) {
+      let name = attrs[i].name;
+      let value = source.getAttribute(name);
+      target.setAttribute(name, value);
     }
   },
 
-  mergeInputs(target, source){
-    DOM.mergeAttrs(target, source)
-    target.readOnly = source.readOnly
+  mergeInputs(target, source) {
+    DOM.mergeAttrs(target, source);
+    target.readOnly = source.readOnly;
   },
 
-  restoreFocus(focused, selectionStart, selectionEnd){
-    if(!DOM.isTextualInput(focused)){ return }
-    if(focused.value === "" || focused.readOnly){ focused.blur()}
-    focused.focus()
-    if(focused.setSelectionRange && focused.type === "text" || focused.type === "textarea"){
-      focused.setSelectionRange(selectionStart, selectionEnd)
+  restoreFocus(focused, selectionStart, selectionEnd) {
+    if (!DOM.isTextualInput(focused)) {
+      return;
+    }
+    if (focused.value === '' || focused.readOnly) {
+      focused.blur();
+    }
+    focused.focus();
+    if (
+      (focused.setSelectionRange && focused.type === 'text') ||
+      focused.type === 'textarea'
+    ) {
+      focused.setSelectionRange(selectionStart, selectionEnd);
     }
   },
 
-  isTextualInput(el){
-    return FOCUSABLE_INPUTS.indexOf(el.type) >= 0
+  isTextualInput(el) {
+    return FOCUSABLE_INPUTS.indexOf(el.type) >= 0;
   }
-}
+};
 
 export default DOM;

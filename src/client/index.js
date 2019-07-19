@@ -14,13 +14,12 @@
 //   document.querySelector('#app')
 // );
 
-import DOM from './dom'
-
+import DOM from './dom';
 
 export class View {
   constructor() {
-    this.initWebSocket()
-    this.initDom()
+    this.initWebSocket();
+    this.initDom();
   }
 
   initWebSocket() {
@@ -34,12 +33,12 @@ export class View {
     ws.onclose = function() {
       console.log('WebSocket connection closed');
     };
-    ws.onmessage = (message) => {
+    ws.onmessage = message => {
       console.log(message);
       if (message.data) {
         this.patch(message.data);
       }
-    }
+    };
     this.socket = ws;
   }
 
@@ -48,81 +47,104 @@ export class View {
     // this.on('click', (evt) => {
     //   this.sendAction('click', evt.path)
     // })
-    for(let eventName of ["change"]){
-      this.on(eventName, e => {
-        let input = e.target
-        let key = input.type === "checkbox" ? "checked" : "value"
-        if(this.prevInput === input && this.prevValue === input[key]){ return }
+    this.on(
+      'change',
+      e => {
+        if (!e.target.classList.contains('toggle')) {
+          return;
+        }
+        let input = e.target;
+        let key = input.type === 'checkbox' ? 'checked' : 'value';
+        if (this.prevInput === input && this.prevValue === input[key]) {
+          return;
+        }
 
-        this.prevInput = input
-        this.prevValue = input[key]
-        this.setActiveElement(input)
-        this.sendAction(eventName, e.path, { target: { [key]: input[key] }, returnValue:  input[key] })
-      }, false)
-    }
+        this.prevInput = input;
+        this.prevValue = input[key];
+        this.setActiveElement(input);
+        this.sendAction('change', e.path, { target: { [key]: input[key] } });
+      },
+      false
+    );
+
+    this.on('keydown', e => {
+      if (e.target.classList.contains('new-todo') && e.which === 13) {
+        this.sendAction('keydown', e.path, {
+          target: { value: e.target.value },
+          which: e.which
+        });
+      }
+    });
   }
 
   sendAction(eventName, path, eventData = {}) {
-    this.socket.send(JSON.stringify({
-      event: eventName,
-      path: serializeDomPath(this.container, path),
-      eventData
-    }))
+    this.socket.send(
+      JSON.stringify({
+        event: eventName,
+        path: serializeDomPath(this.container, path),
+        eventData
+      })
+    );
   }
 
-  setActiveElement(target){
+  setActiveElement(target) {
     if (!target) {
-      return
+      return;
     }
-    if (this.activeElement === target){ return }
-    this.activeElement = target
+    if (this.activeElement === target) {
+      return;
+    }
+    this.activeElement = target;
     let cancel = () => {
-      if(target === this.activeElement){ this.activeElement = null }
-      target.removeEventListener("mouseup", this)
-      target.removeEventListener("touchend", this)
-    }
-    target.addEventListener("mouseup", cancel)
-    target.addEventListener("touchend", cancel)
+      if (target === this.activeElement) {
+        this.activeElement = null;
+      }
+      target.removeEventListener('mouseup', this);
+      target.removeEventListener('touchend', this);
+    };
+    target.addEventListener('mouseup', cancel);
+    target.addEventListener('touchend', cancel);
   }
 
-  getActiveElement(){
-    if (document.activeElement === document.body){
-      return this.activeElement || document.activeElement
+  getActiveElement() {
+    if (document.activeElement === document.body) {
+      return this.activeElement || document.activeElement;
     } else {
-      return document.activeElement
+      return document.activeElement;
     }
   }
 
   patch(html) {
-    let focused = this.getActiveElement()
-    let selectionStart = null
-    let selectionEnd = null
+    let focused = this.getActiveElement();
+    let selectionStart = null;
+    let selectionEnd = null;
 
-    if(DOM.isTextualInput(focused)){
-      selectionStart = focused.selectionStart
-      selectionEnd = focused.selectionEnd
+    if (DOM.isTextualInput(focused)) {
+      selectionStart = focused.selectionStart;
+      selectionEnd = focused.selectionEnd;
     }
 
     this.container.innerHTML = html;
 
     this.silenceEvents(() => {
-      DOM.restoreFocus(focused, selectionStart, selectionEnd)
-    })
+      DOM.restoreFocus(focused, selectionStart, selectionEnd);
+    });
   }
 
-  silenceEvents(callback){
-    this.silenced = true
-    callback()
-    this.silenced = false
+  silenceEvents(callback) {
+    this.silenced = true;
+    callback();
+    this.silenced = false;
   }
 
-  on(event, callback){
+  on(event, callback) {
     window.addEventListener(event, e => {
-      if(!this.silenced){ callback(e) }
-    })
+      if (!this.silenced) {
+        callback(e);
+      }
+    });
   }
 }
-
 
 function serializeDomPath(root, domPath) {
   let i = domPath.length - 1;

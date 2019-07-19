@@ -1,10 +1,11 @@
-
 const Browser = {
-  all(node, query, callback){
-    node.querySelectorAll(query).forEach(callback)
+  all(node, query, callback) {
+    node.querySelectorAll(query).forEach(callback);
   },
 
-  canPushState(){ return (typeof(history.pushState) !== "undefined") },
+  canPushState() {
+    return typeof history.pushState !== 'undefined';
+  },
 
   // fetchPage(href, callback){
   //   let req = new XMLHttpRequest()
@@ -24,38 +25,45 @@ const Browser = {
   //   req.send()
   // },
 
-  pushState(kind, meta, to, callback){
-    if(this.canPushState()){
-      if(to !== window.location.href){ history[kind + "State"](meta, "", to) }
-      callback && callback()
+  pushState(kind, meta, to, callback) {
+    if (this.canPushState()) {
+      if (to !== window.location.href) {
+        history[kind + 'State'](meta, '', to);
+      }
+      callback && callback();
     } else {
-      this.redirect(to)
+      this.redirect(to);
     }
   },
 
-  dispatchEvent(target, eventString){
-    let event = null
-    if(typeof(Event) === "function"){
-      event = new Event(eventString)
+  dispatchEvent(target, eventString) {
+    let event = null;
+    if (typeof Event === 'function') {
+      event = new Event(eventString);
     } else {
-      event = document.createEvent("Event")
-      event.initEvent(eventString, true, true)
+      event = document.createEvent('Event');
+      event.initEvent(eventString, true, true);
     }
-    target.dispatchEvent(event)
+    target.dispatchEvent(event);
   },
 
-  setCookie(name, value){
-    document.cookie = `${name}=${value}`
+  setCookie(name, value) {
+    document.cookie = `${name}=${value}`;
   },
 
-  getCookie(name){
-    return document.cookie.replace(new RegExp(`(?:(?:^|.*;\s*)${name}\s*\=\s*([^;]*).*$)|^.*$`), "$1")
+  getCookie(name) {
+    return document.cookie.replace(
+      new RegExp(`(?:(?:^|.*;\s*)${name}\s*\=\s*([^;]*).*$)|^.*$`),
+      '$1'
+    );
   },
 
-  redirect(toURL, flash){
-    if(flash){ Browser.setCookie("__phoenix_flash__", flash + "; max-age=60000; path=/") }
-    window.location = toURL
+  redirect(toURL, flash) {
+    if (flash) {
+      Browser.setCookie('__phoenix_flash__', flash + '; max-age=60000; path=/');
+    }
+    window.location = toURL;
   }
-}
+};
 
 export default Browser;
