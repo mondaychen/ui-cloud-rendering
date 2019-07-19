@@ -19,9 +19,6 @@ export default class TodoTextInput extends Component {
     super(props);
     this.inputRef = React.createRef();
   }
-  componentDidMount() {
-    this.inputRef.current.focus();
-  }
 
   handleSubmit = e => {
     const text = e.target.value.trim();
@@ -46,6 +43,7 @@ export default class TodoTextInput extends Component {
   render() {
     return (
       <input
+        tabIndex={1}
         className={classnames({
           edit: this.props.editing,
           'new-todo': this.props.newTodo

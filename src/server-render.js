@@ -1,9 +1,10 @@
 import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { JSDOM } from 'jsdom';
-import { mount, configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+// import { mount, configure } from 'enzyme';
+// import Adapter from 'enzyme-adapter-react-16';
 
-configure({ adapter: new Adapter() });
+// configure({ adapter: new Adapter() });
 
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
@@ -22,7 +23,7 @@ export function getEmitter(id) {
 }
 
 function buildJSDOMWindow() {
-  const jsdom = new JSDOM('<!doctype html><html><body></body></html>');
+  const jsdom = new JSDOM('<!doctype html><html><body><div id="_app"></div></body></html>');
   const { window } = jsdom;
 
   function copyProps(src, target) {
@@ -47,38 +48,39 @@ function buildJSDOMWindow() {
   return window;
 }
 
+
+
 export default function serverRender(id) {
   // Configure the store with the initial state provided
   const store = createStore(reducer);
   const window = buildJSDOMWindow();
+  const appDiv = window.document.getElementById('_app');
 
-  // render the App store static markup ins content variable
-  // let renderOutput = render(
-  //   <Provider store={store} >
-  //      <App />
+  function renderApp() {
+    unmountComponentAtNode(appDiv);
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+      appDiv
+    );
+    return appDiv.innerHTML;
+  }
+
+  // const wrapper = mount(
+  //   <Provider store={store}>
+  //     <App />
   //   </Provider>,
-  //   app
   // );
-  // console.log(renderOutput);
-  // const content = app.innerHTML;
-
-  const wrapper = mount(
-    <Provider store={store}>
-      <App />
-    </Provider>
-  );
 
   const emitter = new EventEmitter();
   Emitters.set(id, emitter);
   emitter.on(`input`, function(type, path) {
-    wrapper
-      .find('.toggle')
-      .first()
-      .simulate('change', { target: { checked: true } });
-    emitter.emit(`output`, wrapper.html());
+    store.dispatch({ type: 'COMPLETE_TODO', id: 0 });
+    emitter.emit(`output`, renderApp());
   });
 
-  const content = wrapper.html();
+  const content = renderApp();
 
   return content;
 }

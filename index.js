@@ -60,10 +60,12 @@ wss.on('connection', function(ws, request) {
   const emitter = getEmitter(id);
   emitter.on('output', output => {
     console.log(output);
+    ws.send(output);
   });
   ws.on('message', function(message) {
     console.log(`WS message ${message} from ${id}`);
-    emitter.emit('input');
+    const data = JSON.parse(message);
+    emitter.emit('input', data.event, data.path, data.eventData);
   });
   ws.on('close', function() {
     console.log(`WS connection ${id} close`);
