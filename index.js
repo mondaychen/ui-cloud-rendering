@@ -60,7 +60,10 @@ wss.on('connection', function(ws, request) {
   const emitter = getEmitter(id);
   emitter.on('output', output => {
     console.log(output);
-    ws.send(output);
+    ws.send(JSON.stringify({
+      type: 'patch',
+      html: output
+    }));
   });
   ws.on('message', function(message) {
     console.log(`WS message ${message} from ${id}`);

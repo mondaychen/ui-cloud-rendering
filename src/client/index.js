@@ -37,7 +37,10 @@ export class View {
     ws.onmessage = message => {
       console.log(message);
       if (message.data) {
-        this.patch(message.data);
+        const data = JSON.parse(message.data);
+        if (data.type === 'patch') {
+          this.patch(data.html);
+        }
       }
     };
     this.socket = ws;
