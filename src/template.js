@@ -9,7 +9,7 @@ function template(title, content, renderId) {
                 <link href="assets/css/index.css" rel="stylesheet">
               </head>
               <body data-render-id="${renderId}">
-                  <div id="app" class="todoapp">${content}</div>
+                  <div class="todoapp"><div id="app">${content}</div></div>
                   ${scripts}
               </body>
               `;

@@ -47,6 +47,7 @@ export default class TodoItem extends Component {
             className="toggle"
             type="checkbox"
             checked={todo.completed}
+            data-checked={todo.completed ? 'true': 'false'}
             onChange={() => completeTodo(todo.id)}
           />
           <label onDoubleClick={this.handleDoubleClick}>{todo.text}</label>

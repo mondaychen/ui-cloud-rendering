@@ -14,6 +14,7 @@
 //   document.querySelector('#app')
 // );
 
+import morphdom from 'morphdom';
 import DOM from './dom';
 
 export class View {
@@ -124,7 +125,17 @@ export class View {
       selectionEnd = focused.selectionEnd;
     }
 
-    this.container.innerHTML = html;
+    morphdom(this.container, `<div id="app">${html}</div>`, {
+      onBeforeElUpdated(fromEl, toEl) {
+        if (toEl.tagName === 'INPUT' && toEl.type === 'checkbox') {
+          if (toEl.getAttribute('data-checked') === 'true') {
+            toEl.checked = true;
+          } else if (toEl.getAttribute('data-checked') === 'false') {
+            toEl.checked = false;
+          }
+        }
+      },
+    });
 
     this.silenceEvents(() => {
       DOM.restoreFocus(focused, selectionStart, selectionEnd);
