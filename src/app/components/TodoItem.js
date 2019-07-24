@@ -49,8 +49,9 @@ export default class TodoItem extends Component {
             checked={todo.completed}
             data-checked={todo.completed ? 'true': 'false'}
             onChange={() => completeTodo(todo.id)}
+            data-events-binding="change"
           />
-          <label onDoubleClick={this.handleDoubleClick}>{todo.text}</label>
+          <label onDoubleClick={this.handleDoubleClick} data-events-binding="dblclick">{todo.text}</label>
           <button className="destroy" onClick={() => deleteTodo(todo.id)} />
         </div>
       );

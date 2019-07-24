@@ -17,6 +17,13 @@
 import morphdom from 'morphdom';
 import DOM from './dom';
 
+function traverseDom(root, callback) {
+  callback(root);
+  for (let i = 0; i < root.children.length; i++) {
+    traverseDom(root.children[i], callback);
+  }
+}
+
 export class View {
   constructor() {
     this.initWebSocket();
@@ -48,15 +55,16 @@ export class View {
 
   initDom() {
     this.container = document.getElementById('app');
-    // this.on('click', (evt) => {
-    //   this.sendAction('click', evt.path)
-    // })
-    this.on(
-      'change',
-      e => {
-        if (!e.target.classList.contains('toggle')) {
-          return;
-        }
+
+    this.usedEventHandlers = {};
+    traverseDom(this.container, node => {
+      this.autoBindEvents(node);
+    });
+  }
+
+  autoBindEvents(node) {
+    const DEFAULT_EVENT_READER = {
+      change: (e) => {
         let input = e.target;
         let key = input.type === 'checkbox' ? 'checked' : 'value';
         if (this.prevInput === input && this.prevValue === input[key]) {
@@ -66,18 +74,58 @@ export class View {
         this.prevInput = input;
         this.prevValue = input[key];
         this.setActiveElement(input);
-        this.sendAction('change', e.path, { target: { [key]: input[key] } });
+        return { target: { [key]: input[key] } };
       },
-      false
-    );
-
-    this.on('keydown', e => {
-      if (e.target.classList.contains('new-todo') && e.which === 13) {
-        this.sendAction('keydown', e.path, {
+      keydown: (e) => {
+        return {
           target: { value: e.target.value },
           which: e.which
-        });
+        };
+      },
+      click: e => {
+        return {
+          target: { value: e.target.value, href: e.target.href }
+        };
+      },
+      dblclick: e => {
+        return {
+          target: { value: e.target.value, href: e.target.href }
+        };
+      },
+      blur: e => {
+        return {
+          target: { value: e.target.value }
+        };
       }
+    };
+
+    const boundEventList = node.getAttribute('data-events-binding');
+    if (!boundEventList) {
+      return;
+    }
+    boundEventList.split(',').forEach(eventName => {
+      let handler = this.usedEventHandlers[eventName];
+      if (!handler) {
+        handler = (e) => {
+          if (DEFAULT_EVENT_READER[eventName]) {
+            this.sendAction(eventName, e.path, DEFAULT_EVENT_READER[eventName](e));
+          } else {
+            this.sendAction(eventName, e.path, {});
+          }
+        };
+        this.usedEventHandlers[eventName] = handler;
+      }
+      node.addEventListener(eventName, handler);
+    });
+  }
+
+  autoUnbindEvents(node) {
+    const boundEventList = node.getAttribute('data-events-binding');
+    if (!boundEventList) {
+      return;
+    }
+    boundEventList.split(',').forEach(eventName => {
+      node.removeEventListener(eventName, this.usedEventHandlers[eventName]);
     });
   }
 
@@ -129,7 +177,12 @@ export class View {
     }
 
     morphdom(this.container, `<div id="app">${html}</div>`, {
-      onBeforeElUpdated(fromEl, toEl) {
+      onBeforeNodeAdded: (el) => {
+        traverseDom(el, node => {
+          this.autoBindEvents(node);
+        });
+      },
+      onBeforeElUpdated: (fromEl, toEl) => {
         if (toEl.tagName === 'INPUT' && toEl.type === 'checkbox') {
           if (toEl.getAttribute('data-checked') === 'true') {
             toEl.checked = true;
@@ -137,7 +190,12 @@ export class View {
             toEl.checked = false;
           }
         }
+        // only unbind when necessary?
+        this.autoUnbindEvents(fromEl);
       },
+      onElUpdated: (el) => {
+        this.autoBindEvents(el);
+      }
     });
 
     this.silenceEvents(() => {

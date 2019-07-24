@@ -11,9 +11,10 @@ const MainSection = ({ todosCount, completedCount, actions }) => (
           className="toggle-all"
           type="checkbox"
           checked={completedCount === todosCount}
+          data-checked={completedCount === todosCount ? 'true': 'false'}
           readOnly
         />
-        <label onClick={actions.completeAllTodos} />
+        <label onClick={actions.completeAllTodos} data-events-binding="click" />
       </span>
     )}
     <VisibleTodoList />

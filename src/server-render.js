@@ -96,6 +96,7 @@ export default function serverRender(id) {
       attachTo: appDiv
     }
   );
+  let content = wrapper.html();
 
   const emitter = new EventEmitter();
   Emitters.set(id, emitter);
@@ -106,10 +107,12 @@ export default function serverRender(id) {
     target.simulate(eventType, eventData);
     // wrapper.unmount();
     // wrapper.mount();
-    emitter.emit(`output`, wrapper.html());
+    const newContent = wrapper.html();
+    if (newContent !== content) {
+      content = newContent;
+      emitter.emit(`output`, wrapper.html());
+    }
   });
-
-  const content = wrapper.html();
 
   return content;
 }
