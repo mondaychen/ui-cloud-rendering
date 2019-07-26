@@ -9,7 +9,7 @@ import {
 
 const initialState = [
   {
-    text: 'Use Redux',
+    text: 'Use Cloud Rendering',
     completed: true,
     id: 0
   }

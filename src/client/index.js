@@ -15,7 +15,7 @@
 // );
 
 import morphdom from 'morphdom';
-import DOM from './dom';
+// import DOM from './dom';
 
 function traverseDom(root, callback) {
   callback(root);
@@ -171,10 +171,10 @@ export class View {
     let selectionStart = null;
     let selectionEnd = null;
 
-    if (DOM.isTextualInput(focused)) {
-      selectionStart = focused.selectionStart;
-      selectionEnd = focused.selectionEnd;
-    }
+    // if (DOM.isTextualInput(focused)) {
+    //   selectionStart = focused.selectionStart;
+    //   selectionEnd = focused.selectionEnd;
+    // }
 
     morphdom(this.container, `<div id="app">${html}</div>`, {
       onBeforeNodeAdded: (el) => {
@@ -198,16 +198,16 @@ export class View {
       }
     });
 
-    this.silenceEvents(() => {
-      DOM.restoreFocus(focused, selectionStart, selectionEnd);
-    });
+    // this.silenceEvents(() => {
+    //   DOM.restoreFocus(focused, selectionStart, selectionEnd);
+    // });
   }
 
-  silenceEvents(callback) {
-    this.silenced = true;
-    callback();
-    this.silenced = false;
-  }
+  // silenceEvents(callback) {
+  //   this.silenced = true;
+  //   callback();
+  //   this.silenced = false;
+  // }
 
   on(event, callback) {
     window.addEventListener(event, e => {

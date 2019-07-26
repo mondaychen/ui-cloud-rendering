@@ -29,7 +29,7 @@ const Footer = props => {
         ))}
       </ul>
       {!!completedCount && (
-        <button className="clear-completed" onClick={onClearCompleted}>
+        <button className="clear-completed" onClick={onClearCompleted} data-events-binding="click">
           Clear completed
         </button>
       )}
