@@ -56,7 +56,7 @@ function buildJSDOMWindow() {
 // TODO: since we only care about the n-th element, it's unnecessary to expand the whole thing
 function expandReactWrapperToDom(wrapper) {
   return wrapper.children().reduce((acc, node) => {
-    if (typeof node.type() === 'function') {
+    if (typeof node.type() !== 'string') {
       return [...acc, ...expandReactWrapperToDom(node)];
     } else {
       return [...acc, node];
