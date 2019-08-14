@@ -13,6 +13,7 @@ This TodoMVC app is a proof-of-concept of cloud-rendering based web development.
 - Use diff instead of full HTML string to patch
 - Find a better way (complier?) to annotate event binding and `checked`
 - Allow some JS code to be compiled to front-end to solve the problem of intensive inputs
+- Add UI to notify users of connection lost
 - Try Vue.js
 
 ## Setup

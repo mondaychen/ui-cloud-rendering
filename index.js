@@ -49,7 +49,7 @@ const wss = new WebSocket.Server({
     sessionParser(info.req, {}, () => {
       console.log('WS connection from renderId: ' + info.req.session.renderId);
       // reject here if renderId is unknown, by returning falsy value to done().
-      done(info.req.session.renderId);
+      done(info.req.session.renderId, 1002, 'Unknown session ID');
     });
   },
   server

@@ -17,10 +17,79 @@
 import morphdom from 'morphdom';
 // import DOM from './dom';
 
+const WS_RETRY_INTERVAL = 2000;
+
 function traverseDom(root, callback) {
   callback(root);
   for (let i = 0; i < root.children.length; i++) {
     traverseDom(root.children[i], callback);
+  }
+}
+
+class Socket {
+  constructor(url) {
+    this.url = url;
+    this.connect();
+  }
+
+  connect() {
+    console.log('WebSocket initializing...');
+    this.instance = new WebSocket(this.url);
+    this.instance.onerror = (e) => {
+      console.log('WebSocket error', e);
+      switch (e.code){
+      case 'ECONNREFUSED':
+        this.reconnect(e);
+        break;
+      default:
+        break;
+      }
+    };
+    this.instance.onopen = function() {
+      if (this.wsTry) {
+        console.log('WebSocket connection re-established');
+        clearTimeout(this.wsTry);
+        this.wsTry = undefined;
+      } else {
+        console.log('WebSocket connection established');
+      }
+    };
+    this.instance.onclose = (e) => {
+      switch (e.code){
+      case 1000:	// CLOSE_NORMAL
+        console.log("WebSocket: closed normally");
+        break;
+      default:	// Abnormal closure
+        this.reconnect(e);
+        break;
+      }
+    };
+    this.instance.onmessage = message => {
+      console.log(message);
+
+      if (this.onMessageCallback) {
+        this.onMessageCallback(message);
+      }
+    };
+  }
+
+  onMessage(callback) {
+    this.onMessageCallback = callback;
+  }
+
+  reconnect() {
+    // this.instance.removeAllListeners();
+    if (this.wsTry) {
+      clearTimeout(this.wsTry);
+    }
+    console.log('Waiting to re-connect...');
+    this.wsTry = setTimeout(() => {
+      this.connect();
+    }, WS_RETRY_INTERVAL);
+  }
+
+  send(data) {
+    this.instance.send(data);
   }
 }
 
@@ -31,26 +100,15 @@ export class View {
   }
 
   initWebSocket() {
-    const ws = new WebSocket(`ws://${location.host}`);
-    ws.onerror = function() {
-      console.log('WebSocket error');
-    };
-    ws.onopen = function() {
-      console.log('WebSocket connection established');
-    };
-    ws.onclose = function() {
-      console.log('WebSocket connection closed');
-    };
-    ws.onmessage = message => {
-      console.log(message);
+    this.socket = new Socket(`ws://${location.host}`);
+    this.socket.onMessage((message) => {
       if (message.data) {
         const data = JSON.parse(message.data);
         if (data.type === 'patch') {
           this.patch(data.html);
         }
       }
-    };
-    this.socket = ws;
+    });
   }
 
   initDom() {
